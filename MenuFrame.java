@@ -133,6 +133,15 @@ public class MenuFrame extends JFrame {
 
     private void startGame() {
         // Start the game
+
+            getContentPane().removeAll(); // Remove all components (the menu)
+            Board gameBoard = new Board(); // Create the game board
+            getContentPane().add(gameBoard); // Add the game board to this frame
+            getContentPane().revalidate(); // Revalidate the content pane
+            getContentPane().repaint(); // Repaint the frame
+            pack(); // Adjust the window size based on its content
+            setLocationRelativeTo(null); // Center the window again, if desired
+
     }
 
     private void showSettings() {
@@ -142,6 +151,7 @@ public class MenuFrame extends JFrame {
     private void showScoreboard() {
         // Show scoreboard
     }
+
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new MenuFrame());
