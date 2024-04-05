@@ -46,7 +46,10 @@ public class Board extends JPanel implements KeyListener{
 	{	
 		
 		looper = new Timer(delay, new GameLooper());
-		
+		setFocusable(true);
+		requestFocusInWindow();
+		addKeyListener(this);
+
 		shapes[0] = new Shape(new int[][]{
             {1, 1, 1, 1} // I shape;
         }, this, colors[0]);
