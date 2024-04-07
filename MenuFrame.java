@@ -145,12 +145,22 @@
 
         }
 
+
+
         private void showSettings() {
-            // Show settings
+            SettingsPanel settingsPanel = new SettingsPanel(this);
+            switchToPanel(settingsPanel);
         }
 
         private void showScoreboard() {
             // Show scoreboard
+        }
+        public void switchToPanel(JPanel panel) {
+            getContentPane().removeAll(); // Remove the current panel
+            getContentPane().add(panel); // Add the new panel
+            getContentPane().revalidate();
+            getContentPane().repaint();
+            pack(); // Optional, if you want to resize the frame to fit the content
         }
 
 
