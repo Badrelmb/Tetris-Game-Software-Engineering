@@ -1,4 +1,4 @@
-package main;
+package Final.src.main;
 
 import javax.swing.*;
 import java.awt.*;
@@ -142,17 +142,27 @@ public class MenuFrame extends JFrame {
         getContentPane().revalidate(); // Revalidate the content pane
         getContentPane().repaint(); // Repaint the frame
         gameBoard.requestFocusInWindow();
-        setSize(800, 720);
+        pack(); // Adjust the window size based on its content
         setLocationRelativeTo(null); // Center the window again, if desired
 
     }
 
+
+
     private void showSettings() {
-        // Show settings
+        SettingsPanel settingsPanel = new SettingsPanel(this);
+        switchToPanel(settingsPanel);
     }
 
     private void showScoreboard() {
         // Show scoreboard
+    }
+    public void switchToPanel(JPanel panel) {
+        getContentPane().removeAll(); // Remove the current panel
+        getContentPane().add(panel); // Add the new panel
+        getContentPane().revalidate();
+        getContentPane().repaint();
+        pack(); // Optional, if you want to resize the frame to fit the content
     }
 
 
