@@ -53,7 +53,7 @@ public class Board extends JPanel implements KeyListener{
 
     public Board()
     {
-        this.setPreferredSize(new Dimension(720, 1280));
+        this.setPreferredSize(new Dimension(800, 720));
         this.setBackground(Color.black);
         this.setLayout(null);
 
