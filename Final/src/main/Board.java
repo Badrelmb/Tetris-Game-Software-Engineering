@@ -12,8 +12,6 @@ import javax.swing.Timer;
 
 public class Board extends JPanel implements KeyListener{
 
-    private static final long serialVersionUID = 1L;
-
     private static int delay = 300;
 
     public static int STATE_GAME_PLAY = 0;
@@ -35,8 +33,6 @@ public class Board extends JPanel implements KeyListener{
 
     private Color[] colors = {Color.CYAN, Color.MAGENTA, Color.ORANGE,Color.BLUE,
             Color.GREEN,Color.RED,Color.YELLOW};
-
-    private char[] numbers ={'0','0','0','0','0','0'};
     private Shape[] shapes = new Shape[7];
 
     private Shape currentShape, nextShape;
