@@ -5,7 +5,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.ArrayList;
 import java.util.Random;
+import java.util.List;
 
 import javax.swing.JPanel;
 import javax.swing.Timer;
@@ -26,9 +28,9 @@ public class Board extends JPanel implements KeyListener{
 
     private Timer looper;
     private Color[][] board = new Color[BOARD_HEIGHT][BOARD_WIDTH];
-
+    
     private int deletedLine;
-
+    
     private Random random= new Random();
 
     private Color[] colors = {Color.CYAN, Color.MAGENTA, Color.ORANGE,Color.BLUE,
@@ -191,25 +193,69 @@ public class Board extends JPanel implements KeyListener{
     }
 
     public void setNextShape() {
-        int index = random.nextInt(shapes.length);
-        nextShape = new Shape(shapes[index].getCoords(), this, colors[index]);
-        /*CustomRandom customRandom = new CustomRandom(0.2); // CustomRandom 인스턴스 생성, 기본 가중치 0.2 설정
-        int index = customRandom.generateNumber(new Random()); // CustomRandom을 통해 인덱스 생성
-        nextShape = new Shape(shapes[index].getCoords(), this, colors[index]);*/
+        
+    
+            int index = random.nextInt(shapes.length);
+            nextShape = new Shape(shapes[index].getCoords(), this, colors[index]);
+
+            // 동기화된 블록 내에서 nextShape 객체를 변경
+          
+    
+            
     }
     public void setCurrentShape() {
         currentShape = nextShape;
+        
+        
         setNextShape();
+
         for (int row = 0; row < currentShape.getCoords().length; row++) {
             for (int col = 0; col < currentShape.getCoords()[0].length; col++) {
-                if (currentShape.getCoords()[row][col] != 0) {
-                    if (board[currentShape.getY() + row][currentShape.getX() + col] != null) {
+                if (currentShape.getCoords()[row][col] != 0) { // 블럭이 존재하고
+                    if (board[currentShape.getY() + row][currentShape.getX() + col] != null) { // 행을 초과하면
                         state = STATE_GAME_OVER;
                     }
                 }
             }
         }
     }
+    public void ItemL() {
+        int index = random.nextInt(shapes.length);
+        int[][] itemShape = shapes[index].getCoords();
+    
+        // 랜덤하게 선택된 1인 위치를 찾기 위한 리스트
+        List<Point> onePositions = new ArrayList<>();
+        for (int row = 0; row < itemShape.length; row++) {
+            for (int col = 0; col < itemShape[row].length; col++) {
+                if (itemShape[row][col] == 1) {
+                    onePositions.add(new Point(row, col));
+                }
+            }
+        }
+    
+        if (!onePositions.isEmpty()) {
+            // 랜덤하게 선택된 1인 위치 중에서 흰색(값 2)으로 변경되지 않은 위치를 찾기
+            List<Point> nonWhitePositions = new ArrayList<>();
+            for (Point point : onePositions) {
+                if (itemShape[point.x][point.y] != 2) {
+                    nonWhitePositions.add(point);
+                }
+            }
+    
+            if (!nonWhitePositions.isEmpty()) {
+                // 랜덤하게 선택된 흰색(값 2)이 아닌 위치 중에서 하나를 선택하여 흰색(값 2)으로 변경
+                int randomIndex = random.nextInt(nonWhitePositions.size());
+                Point selectedPoint = nonWhitePositions.get(randomIndex);
+                itemShape[selectedPoint.x][selectedPoint.y] = 2;
+            }
+        }
+    
+        // 다음 모양을 변경하고 새로 설정된 모양을 반영
+        nextShape = new Shape(itemShape, this, colors[index]);
+    }
+    
+    
+    
 
 
     // 키 버튼 이벤트
@@ -219,50 +265,40 @@ public class Board extends JPanel implements KeyListener{
     }
 
     @Override
+    
     public void keyPressed(KeyEvent e) {
-        // 오른쪽,왼쪽,아래,회전,떨어뜨리기, 일시중지, 게임종료
-        if(state== STATE_GAME_PLAY) {
-            if(e.getKeyCode()==KeyEvent.VK_RIGHT) {
+        if (state == STATE_GAME_PLAY) {
+            // 게임 플레이 중일 때의 키 입력 처리
+            if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
                 currentShape.setDeltaX(1);
-            }
-            else if(e.getKeyCode()==KeyEvent.VK_LEFT) {
+            } else if (e.getKeyCode() == KeyEvent.VK_LEFT) {
                 currentShape.setDeltaX(-1);
-            }
-            else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-                currentShape.moveDown(); // VK_DOWN 키를 눌렀을 때 블록을 한 칸 아래로 이동
-            }
-            else if(e.getKeyCode()==KeyEvent.VK_UP) {
+            } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+                currentShape.moveDown();
+            } else if (e.getKeyCode() == KeyEvent.VK_UP) {
                 currentShape.rotateShape();
-            }
-            else if(e.getKeyCode()==KeyEvent.VK_SPACE) {
+            } else if (e.getKeyCode() == KeyEvent.VK_SPACE) {
                 currentShape.dropDown();
-            }
-            else if(e.getKeyCode() == KeyEvent.VK_P) {
+            } else if (e.getKeyCode() == KeyEvent.VK_P) {
                 state = STATE_GAME_PAUSE;
+            } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                System.exit(0); // ESC 키로 게임 종료
             }
-            else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                // 게임 종료
-                System.exit(0);
+        } else if (state == STATE_GAME_OVER) {
+            // 게임 오버 상태일 때의 키 입력 처리
+            if (e.getKeyCode() == KeyEvent.VK_P) {
+                // 게임 재시작
+                startGame();
+            } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                System.exit(0); // ESC 키로 게임 종료
             }
-        }
-        // 게임 리플레이
-        else if(state == STATE_GAME_OVER) {
-            if(e.getKeyCode() == KeyEvent.VK_P) {
-                for(int row =0; row<board.length;row++) {
-                    for(int col=0; col<board[row].length; col++) {
-                        board[row][col]=null;
-                    }
-                }
+        } else if (state == STATE_GAME_PAUSE) {
+            // 게임 일시 정지 상태일 때의 키 입력 처리
+            if (e.getKeyCode() == KeyEvent.VK_P) {
+                state = STATE_GAME_PLAY; // 다시 게임 플레이 상태로 변경
             }
-            setCurrentShape();
-            state = STATE_GAME_PLAY;
+        
         }
-        else if(state == STATE_GAME_PAUSE) {
-            if(e.getKeyCode() == KeyEvent.VK_P) {
-                state = STATE_GAME_PLAY;}
-        }
-
-
     }
 
     @Override
@@ -275,7 +311,6 @@ public class Board extends JPanel implements KeyListener{
         setCurrentShape();
         state = STATE_GAME_PLAY;
         looper.start();
-
     }
     public void stopGame() {
         score = 0;
@@ -308,6 +343,16 @@ public class Board extends JPanel implements KeyListener{
         }
         // 삭제된 줄의 수를 누적
         deletedLine += deletedLines;
+        if(deletedLine>=2){
+            ItemL();
+            delay -= 20;
+            addBonusScore();
+            if (delay <=100) { // 100ms 이하로 감소하지 않도록 보정
+                delay = 100;
+            }
+            deletedLine =0;
+            
+        }
     }
 
 
@@ -338,18 +383,11 @@ public class Board extends JPanel implements KeyListener{
                 System.out.println("딜레이 : "+delay);
                 System.out.println("삭제된 줄의 수 : "+deletedLine);
 
-                if(deletedLine>=5) {
-                    delay -= 20;
-                    addBonusScore();
-                    if (delay <=100) { // 100ms 이하로 감소하지 않도록 보정
-                        delay = 100;
-                    }
-                    deletedLine %=5;
-                }
             }
 
         }
     }
+    
 
     public void addScore() {
         score +=2 ;

@@ -83,6 +83,7 @@ public class MenuFrame extends JFrame {
 
         setVisible(true);
     }
+    
 
     private void buttonAction(ActionEvent e) {
         // Button action logic

@@ -213,17 +213,20 @@ public class Shape {
         return matrix;
 
     }
+    
+    
     public void render(Graphics g) {
-
-        String text = "O";
-        Font font = new Font("Arial", Font.BOLD, BLOCK_SIZE*7/5);
-        g.setFont(font);
-        g.setColor(color);
-
         for (int row = 0; row < coords.length; row++) {
             for (int col = 0; col < coords[0].length; col++) {
                 if (coords[row][col] != 0) {
-                    g.drawString(text,col * BLOCK_SIZE + x * BLOCK_SIZE+66, row * BLOCK_SIZE + y * BLOCK_SIZE+80);
+                    Color color;
+                    if (coords[row][col] == 2) {
+                        color = Color.WHITE; // Set white for value 2
+                    } else {
+                        color = getColor(); // Use the Shape's color for others
+                    }
+                    g.setColor(color);
+                    g.drawString("O", col * BLOCK_SIZE + x * BLOCK_SIZE + 66, row * BLOCK_SIZE + y * BLOCK_SIZE + 80);
                 }
             }
         }
