@@ -221,7 +221,9 @@ public class Shape {
                 if (coords[row][col] != 0) {
                     Color color;
                     if (coords[row][col] == 2) {
+                        
                         color = Color.WHITE; // Set white for value 2
+                        coords[row][col] = 1;
                     } else {
                         color = getColor(); // Use the Shape's color for others
                     }

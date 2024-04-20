@@ -285,11 +285,18 @@ public class Board extends JPanel implements KeyListener{
     // 줄 삭제 알고리즘
     public void checkLine() {
         List<Integer> fullLines = new ArrayList<>();
-    
+        
         // 꽉 찬 줄을 찾아서 삭제할 줄로 표시합니다.
         for (int row = 0; row < BOARD_HEIGHT; row++) {
             boolean isFull = true;
             for (int col = 0; col < BOARD_WIDTH; col++) {
+                if (board[row][col] != null && board[row][col].equals(Color.WHITE)) {
+                    // board 배열의 해당 행의 모든 열을 null로 초기화
+                    for (int c = 0; c < board[row].length; c++) {
+                        board[row][c] = null;
+                    }
+                }
+                
                 if (board[row][col] == null) {
                     isFull = false;
                     break;
@@ -307,6 +314,7 @@ public class Board extends JPanel implements KeyListener{
             deletedLineCount += fullLines.size();
         }
     }
+
     private void setRandomBlockToWhite() {
         if (currentShape != null && deletedLineCount >= 3) { // 현재 떨어지고 있는 블록이 있고, 삭제된 줄 수가 3 이상인 경우
             int[][] coords = currentShape.getCoords();
@@ -328,8 +336,6 @@ public class Board extends JPanel implements KeyListener{
             repaint();
         }
     }
-    
-    
     
     
     private void animateLineDeletion(List<Integer> fullLines) {
