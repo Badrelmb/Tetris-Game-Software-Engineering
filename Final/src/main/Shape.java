@@ -46,7 +46,7 @@ public class Shape {
 
     long deltaTime;
 
-    public void update() {
+    public void update() { 
         moveX = true;
         deltaTime = System.currentTimeMillis() - lastTime;
         time += deltaTime;

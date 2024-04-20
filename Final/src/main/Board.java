@@ -29,7 +29,6 @@ public class Board extends JPanel implements KeyListener{
     private Timer looper;
     private Color[][] board = new Color[BOARD_HEIGHT][BOARD_WIDTH];
     
-    private int deletedLine;
     
     private Random random= new Random();
 
@@ -38,7 +37,7 @@ public class Board extends JPanel implements KeyListener{
     private Shape[] shapes = new Shape[7];
 
     private Shape currentShape, nextShape;
-
+    private int deletedLineCount = 0;
     private int score = 0;
     public static int left_x;
     public static int right_x;
@@ -105,6 +104,7 @@ public class Board extends JPanel implements KeyListener{
     {
         if(state == STATE_GAME_PLAY) {
             currentShape.update();
+            
         }
         return;
     }
@@ -193,20 +193,13 @@ public class Board extends JPanel implements KeyListener{
     }
 
     public void setNextShape() {
-        
-    
-            int index = random.nextInt(shapes.length);
-            nextShape = new Shape(shapes[index].getCoords(), this, colors[index]);
-
-            // 동기화된 블록 내에서 nextShape 객체를 변경
-          
+        int index = random.nextInt(shapes.length);
+        nextShape = new Shape(shapes[index].getCoords(), this, colors[index]);
     
             
     }
     public void setCurrentShape() {
-        currentShape = nextShape;
-        
-        
+        currentShape = nextShape;        
         setNextShape();
 
         for (int row = 0; row < currentShape.getCoords().length; row++) {
@@ -218,42 +211,8 @@ public class Board extends JPanel implements KeyListener{
                 }
             }
         }
+        setRandomBlockToWhite();
     }
-    public void ItemL() {
-        int index = random.nextInt(shapes.length);
-        int[][] itemShape = shapes[index].getCoords();
-    
-        // 랜덤하게 선택된 1인 위치를 찾기 위한 리스트
-        List<Point> onePositions = new ArrayList<>();
-        for (int row = 0; row < itemShape.length; row++) {
-            for (int col = 0; col < itemShape[row].length; col++) {
-                if (itemShape[row][col] == 1) {
-                    onePositions.add(new Point(row, col));
-                }
-            }
-        }
-    
-        if (!onePositions.isEmpty()) {
-            // 랜덤하게 선택된 1인 위치 중에서 흰색(값 2)으로 변경되지 않은 위치를 찾기
-            List<Point> nonWhitePositions = new ArrayList<>();
-            for (Point point : onePositions) {
-                if (itemShape[point.x][point.y] != 2) {
-                    nonWhitePositions.add(point);
-                }
-            }
-    
-            if (!nonWhitePositions.isEmpty()) {
-                // 랜덤하게 선택된 흰색(값 2)이 아닌 위치 중에서 하나를 선택하여 흰색(값 2)으로 변경
-                int randomIndex = random.nextInt(nonWhitePositions.size());
-                Point selectedPoint = nonWhitePositions.get(randomIndex);
-                itemShape[selectedPoint.x][selectedPoint.y] = 2;
-            }
-        }
-    
-        // 다음 모양을 변경하고 새로 설정된 모양을 반영
-        nextShape = new Shape(itemShape, this, colors[index]);
-    }
-    
     
     
 
@@ -322,39 +281,121 @@ public class Board extends JPanel implements KeyListener{
         }
         looper.stop();
     }
+    
     // 줄 삭제 알고리즘
     public void checkLine() {
-        int deletedLines = 0; // 삭제된 줄 수를 저장할 변수
-        int bottomLine = board.length - 1;
-        for (int topLine = board.length - 1; topLine > 0; topLine--) {
-            int count = 0;
-            for (int col = 0; col < board[0].length; col++) {
-                if (board[topLine][col] != null) {
-                    count++;
+        List<Integer> fullLines = new ArrayList<>();
+    
+        // 꽉 찬 줄을 찾아서 삭제할 줄로 표시합니다.
+        for (int row = 0; row < BOARD_HEIGHT; row++) {
+            boolean isFull = true;
+            for (int col = 0; col < BOARD_WIDTH; col++) {
+                if (board[row][col] == null) {
+                    isFull = false;
+                    break;
                 }
-                board[bottomLine][col] = board[topLine][col];
             }
-            if (count < board[0].length) {
-                bottomLine--;
-            } else {
-                addScore();
-                deletedLines++; // 삭제된 줄이 있으면 deletedLines를 증가시킴
+            if (isFull) {
+                fullLines.add(row);
             }
         }
-        // 삭제된 줄의 수를 누적
-        deletedLine += deletedLines;
-        if(deletedLine>=2){
-            ItemL();
-            delay -= 20;
-            addBonusScore();
-            if (delay <=100) { // 100ms 이하로 감소하지 않도록 보정
-                delay = 100;
-            }
-            deletedLine =0;
-            
+    
+        // 각 꽉 찬 줄에 대한 애니메이션을 적용하고 처리합니다.
+        if (!fullLines.isEmpty()) {
+            // 줄 삭제 및 deletedLineCount 증가
+            animateLineDeletion(fullLines);
+            deletedLineCount += fullLines.size();
         }
     }
-
+    private void setRandomBlockToWhite() {
+        if (currentShape != null && deletedLineCount >= 3) { // 현재 떨어지고 있는 블록이 있고, 삭제된 줄 수가 3 이상인 경우
+            int[][] coords = currentShape.getCoords();
+            Random random = new Random();
+            boolean found = false;
+    
+            // 랜덤하게 흰색 블록을 설정합니다.
+            while (!found) {
+                int row = random.nextInt(coords.length);
+                int col = random.nextInt(coords[row].length);
+    
+                if (coords[row][col] != 0) { // 블록이 존재하는 경우
+                    coords[row][col] = 2; // 흰색 블록으로 설정
+                    found = true;
+                }
+            }
+    
+            // 다시 렌더링하여 변경 사항을 적용합니다.
+            repaint();
+        }
+    }
+    
+    
+    
+    
+    private void animateLineDeletion(List<Integer> fullLines) {
+        Timer timer = new Timer(100, new ActionListener() {
+            int flashCount = 0;
+            boolean isVisible = true;
+    
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (flashCount < 3) { // 3번 깜빡이도록 설정합니다.
+                    // 꽉 찬 줄을 깜빡이는 효과를 줍니다.
+                    for (Integer line : fullLines) {
+                        for (int col = 0; col < BOARD_WIDTH; col++) {
+                            if (isVisible) {
+                                board[line][col] = Color.WHITE; // 흰색으로 깜빡입니다.
+                            } else {
+                                board[line][col] = null; // 다시 비웁니다.
+                            }
+                        }
+                    }
+                    isVisible = !isVisible;
+                    repaint(); // 화면을 갱신합니다.
+                    flashCount++;
+                } else {
+                    // 꽉 찬 줄을 지우고, 남은 블록들을 아래로 내립니다.
+                    clearAndDropLines(fullLines);
+                    ((Timer) e.getSource()).stop(); // 타이머를 중지합니다.
+                }
+            }
+        });
+    
+        timer.start();
+    }
+    
+    private void clearAndDropLines(List<Integer> fullLines) {
+        // 꽉 찬 줄을 삭제합니다.
+        for (Integer line : fullLines) {
+            for (int col = 0; col < BOARD_WIDTH; col++) {
+                board[line][col] = null;
+            }
+        }
+    
+        // 삭제된 줄 위의 모든 블록을 한 번에 아래로 이동시킵니다.
+        for (int row = fullLines.get(0) - 1; row >= 0; row--) {
+            for (int col = 0; col < BOARD_WIDTH; col++) {
+                if (board[row][col] != null) {
+                    // 블록을 최대한 아래로 이동시킵니다.
+                    int fallDistance = fullLines.size();
+                    while (row + fallDistance < BOARD_HEIGHT && board[row + fallDistance][col] == null) {
+                        board[row + fallDistance][col] = board[row][col];
+                        board[row][col] = null;
+                        fallDistance++;
+                    }
+                }
+            }
+        }
+    
+        // 점수 업데이트 등 게임 로직 처리를 수행합니다.
+        score += fullLines.size() * 100; // 삭제된 줄 수에 따라 점수를 추가합니다.
+        checkLine();
+        deletedLineCount %= 3;
+        repaint(); // 화면을 다시 그립니다.
+    }
+    
+    
+    
 
 
     class GameLooper implements ActionListener {
@@ -365,6 +406,9 @@ public class Board extends JPanel implements KeyListener{
             if(!(state ==STATE_GAME_PAUSE)) {
                 update();
                 repaint();
+                 // deletedLineCount가 3 이상이면 nextShape 업데이트
+                
+
 
                 // 시간이 1분 경과했을 때 속도 증가
                 long currentTime = System.currentTimeMillis();
@@ -381,7 +425,7 @@ public class Board extends JPanel implements KeyListener{
 
                 looper.setDelay(delay);
                 System.out.println("딜레이 : "+delay);
-                System.out.println("삭제된 줄의 수 : "+deletedLine);
+                System.out.println("삭제된 줄의 수 : "+deletedLineCount);
 
             }
 
