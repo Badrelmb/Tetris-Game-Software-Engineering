@@ -218,18 +218,13 @@ public class Shape {
     public void render(Graphics g) {
         for (int row = 0; row < coords.length; row++) {
             for (int col = 0; col < coords[0].length; col++) {
-                if (coords[row][col] != 0) {
+                if (coords[row][col] !=0) {
                     Color color;
-                    if (coords[row][col] == 2) {
-                        
-                        color = Color.WHITE; // Set white for value 2
-                        coords[row][col] = 1;
-                    } else {
-                        color = getColor(); // Use the Shape's color for others
-                    }
+                    color = getColor(); // Use the Shape's color for others
                     g.setColor(color);
                     g.drawString("O", col * BLOCK_SIZE + x * BLOCK_SIZE + 66, row * BLOCK_SIZE + y * BLOCK_SIZE + 80);
                 }
+                
             }
         }
     }

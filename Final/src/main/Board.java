@@ -290,14 +290,8 @@ public class Board extends JPanel implements KeyListener{
         for (int row = 0; row < BOARD_HEIGHT; row++) {
             boolean isFull = true;
             for (int col = 0; col < BOARD_WIDTH; col++) {
-                if (board[row][col] != null && board[row][col].equals(Color.WHITE)) {
+                if (board[row][col] == null||board[row][col].equals(Color.white)) {
                     // board 배열의 해당 행의 모든 열을 null로 초기화
-                    for (int c = 0; c < board[row].length; c++) {
-                        board[row][c] = null;
-                    }
-                }
-                
-                if (board[row][col] == null) {
                     isFull = false;
                     break;
                 }
@@ -314,7 +308,7 @@ public class Board extends JPanel implements KeyListener{
             deletedLineCount += fullLines.size();
         }
     }
-
+    // 흰색을 지정할떄까지는 다음 블록 생성 x 하게 해야함
     private void setRandomBlockToWhite() {
         if (currentShape != null && deletedLineCount >= 3) { // 현재 떨어지고 있는 블록이 있고, 삭제된 줄 수가 3 이상인 경우
             int[][] coords = currentShape.getCoords();
@@ -327,7 +321,7 @@ public class Board extends JPanel implements KeyListener{
                 int col = random.nextInt(coords[row].length);
     
                 if (coords[row][col] != 0) { // 블록이 존재하는 경우
-                    coords[row][col] = 2; // 흰색 블록으로 설정
+                    board[row][col] = Color.white;
                     found = true;
                 }
             }
