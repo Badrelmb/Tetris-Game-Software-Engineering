@@ -33,8 +33,17 @@ public class Board extends JPanel implements KeyListener{
 
     private Random random= new Random();
 
-    private Color[] colors = {Color.CYAN, Color.MAGENTA, Color.ORANGE,Color.BLUE,
-            Color.GREEN,Color.RED,Color.YELLOW};
+    Color SKYBLUE = new Color(86, 180, 232);
+    Color VERMILION = new Color(213, 94, 0);
+    Color BLUISHGREEN = new Color(0, 159, 115);
+    Color REDDISHPURPLE = new Color(204, 121, 167);
+    Color ORANGE = new Color(229, 159, 0);
+    Color YELLOW = new Color(240, 228, 66);
+    Color BLUE = new Color(0, 114, 187);
+
+    private Color[][] colors = {{Color.CYAN, Color.MAGENTA, Color.ORANGE,Color.BLUE,
+        Color.GREEN,Color.RED,Color.YELLOW}, {BLUISHGREEN, REDDISHPURPLE, ORANGE, SKYBLUE,
+            BLUE, VERMILION, YELLOW}};
 
     private char[] numbers ={'0','0','0','0','0','0'};
     private Shape[] shapes = new Shape[7];
@@ -50,6 +59,8 @@ public class Board extends JPanel implements KeyListener{
     public final int WIDTH = 303;
     public final int HEIGHT = 606;
 
+    public static int colorblind = 1;
+
 
     public Board()
     {
@@ -64,37 +75,37 @@ public class Board extends JPanel implements KeyListener{
 
         shapes[0] = new Shape(new int[][]{
                 {1, 1, 1, 1} // I shape;
-        }, this, colors[0]);
+        }, this, colors[colorblind][0]);
 
         shapes[1] = new Shape(new int[][]{
                 {1, 1, 1},
                 {0, 1, 0}, // T shape;
-        }, this, colors[1]);
+        }, this, colors[colorblind][1]);
 
         shapes[2] = new Shape(new int[][]{
                 {1, 1, 1},
                 {1, 0, 0}, // L shape;
-        }, this, colors[2]);
+        }, this, colors[colorblind][2]);
 
         shapes[3] = new Shape(new int[][]{
                 {1, 1, 1},
                 {0, 0, 1}, // J shape;
-        }, this, colors[3]);
+        }, this, colors[colorblind][3]);
 
         shapes[4] = new Shape(new int[][]{
                 {0, 1, 1},
                 {1, 1, 0}, // S shape;
-        }, this, colors[4]);
+        }, this, colors[colorblind][4]);
 
         shapes[5] = new Shape(new int[][]{
                 {1, 1, 0},
                 {0, 1, 1}, // Z shape;
-        }, this, colors[5]);
+        }, this, colors[colorblind][5]);
 
         shapes[6] = new Shape(new int[][]{
                 {1, 1},
                 {1, 1}, // O shape;
-        }, this, colors[6]);
+        }, this, colors[colorblind][6]);
 
         left_x = (WindowGame.WIDTH/2)-(WIDTH/2);
         right_x = left_x + WIDTH;
@@ -196,7 +207,7 @@ public class Board extends JPanel implements KeyListener{
 
     public void setNextShape() {
         int index = CustomRandom.selectNumber(1);//이지모드는 1.2 하드모드는 0.8의 가중치를 갖는다.
-        nextShape = new Shape(shapes[index].getCoords(), this, colors[index]);
+        nextShape = new Shape(shapes[index].getCoords(), this, colors[colorblind][index]);
     }
     public void setCurrentShape() {
         currentShape = nextShape;
