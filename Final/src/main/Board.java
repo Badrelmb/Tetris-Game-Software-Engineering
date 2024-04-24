@@ -195,11 +195,8 @@ public class Board extends JPanel implements KeyListener{
     }
 
     public void setNextShape() {
-        int index = random.nextInt(shapes.length);
+        int index = CustomRandom.selectNumber(1);//이지모드는 1.2 하드모드는 0.8의 가중치를 갖는다.
         nextShape = new Shape(shapes[index].getCoords(), this, colors[index]);
-        /*CustomRandom customRandom = new CustomRandom(0.2); // CustomRandom 인스턴스 생성, 기본 가중치 0.2 설정
-        int index = customRandom.generateNumber(new Random()); // CustomRandom을 통해 인덱스 생성
-        nextShape = new Shape(shapes[index].getCoords(), this, colors[index]);*/
     }
     public void setCurrentShape() {
         currentShape = nextShape;
