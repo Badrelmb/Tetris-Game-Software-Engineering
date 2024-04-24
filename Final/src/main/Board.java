@@ -53,7 +53,7 @@ public class Board extends JPanel implements KeyListener{
 
     public Board()
     {
-        this.setPreferredSize(new Dimension(720, 1280));
+        this.setPreferredSize(new Dimension(800, 720));
         this.setBackground(Color.black);
         this.setLayout(null);
 
@@ -195,7 +195,7 @@ public class Board extends JPanel implements KeyListener{
     }
 
     public void setNextShape() {
-        int index = random.nextInt(shapes.length);
+        int index = CustomRandom.selectNumber(1);//이지모드는 1.2 하드모드는 0.8의 가중치를 갖는다.
         nextShape = new Shape(shapes[index].getCoords(), this, colors[index]);
     }
     public void setCurrentShape() {
