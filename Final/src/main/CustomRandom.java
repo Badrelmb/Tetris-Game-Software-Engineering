@@ -1,15 +1,16 @@
 package Final.src.main;
 import java.util.Random;
+import java.util.Scanner;
 
 
 public class CustomRandom{
-    private static final double[] weights = {1.2, 1, 1, 1, 1, 1, 1}; // 가중치 배열
+    private static final double[] weights = {1, 1, 1, 1, 1, 1, 1}; // 가중치 배열
 
     // 룰렛 휠 선택 메소드
-    public static int selectNumber() {
+    public static int selectNumber(double n) {
         Random random = new Random();
         double totalWeight = 0;
-
+        weights[0] = n;
         // 전체 가중치 합 구하기
         for (double weight : weights) {
             totalWeight += weight;
@@ -51,18 +52,17 @@ public class CustomRandom{
 
     public static void main(String[] args) {
         double[] probabilities = calculateProbabilities();
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("가중치 입력 1.2 or 0.8 : ");
 
-        // 각 숫자의 확률 출력
-        System.out.println("각 숫자가 나올 확률:");
-        for (int i = 0; i < probabilities.length; i++) {
-            System.out.println(i + ": " + probabilities[i]);
-        }
+        double n = scanner.nextDouble();
+
 
         // 시뮬레이션을 통해 선택된 숫자 테스트
-        int totalIterations = 10000;
+        int totalIterations = 100000;
         int[] count = new int[weights.length];
         for (int i = 0; i < totalIterations; i++) {
-            int selectedNumber = selectNumber();
+            int selectedNumber = selectNumber(n);
             count[selectedNumber]++;
         }
 
@@ -71,5 +71,14 @@ public class CustomRandom{
         for (int i = 0; i < count.length; i++) {
             System.out.println(i + ": " + count[i]);
         }
+
+
+        // 각 숫자의 확률 출력
+        System.out.println("각 숫자가 나올 확률:");
+        for (int i = 0; i < probabilities.length; i++) {
+            System.out.println(i + ": " + (double)count[i]/totalIterations*100+"%");
+        }
+
+        scanner.close();
     }
 }
