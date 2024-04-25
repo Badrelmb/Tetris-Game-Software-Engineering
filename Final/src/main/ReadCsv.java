@@ -16,7 +16,7 @@ public class ReadCsv {
 
     public List<List<String>> readCSV() {
         List<List<String>> csvList = new ArrayList<List<String>>();
-        File csv = new File("src/main/ranking.csv");
+        File csv = new File("Final/src/main/ranking.csv");
         BufferedReader br = null;
         String line = "";
 

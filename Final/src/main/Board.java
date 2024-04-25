@@ -5,7 +5,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.Random;
 
 import javax.swing.JPanel;
 import javax.swing.Timer;
@@ -31,8 +30,6 @@ public class Board extends JPanel implements KeyListener{
 
     private int deletedLine;
 
-    private Random random= new Random();
-
     Color SKYBLUE = new Color(86, 180, 232);
     Color VERMILION = new Color(213, 94, 0);
     Color BLUISHGREEN = new Color(0, 159, 115);
@@ -42,10 +39,9 @@ public class Board extends JPanel implements KeyListener{
     Color BLUE = new Color(0, 114, 187);
 
     private Color[][] colors = {{Color.CYAN, Color.MAGENTA, Color.ORANGE,Color.BLUE,
-        Color.GREEN,Color.RED,Color.YELLOW}, {BLUISHGREEN, REDDISHPURPLE, ORANGE, SKYBLUE,
-            BLUE, VERMILION, YELLOW}};
+            Color.GREEN,Color.RED,Color.YELLOW}, {BLUISHGREEN, REDDISHPURPLE, ORANGE, SKYBLUE,
+                BLUE, VERMILION, YELLOW}};
 
-    private char[] numbers ={'0','0','0','0','0','0'};
     private Shape[] shapes = new Shape[7];
 
     private Shape currentShape, nextShape;
@@ -60,7 +56,6 @@ public class Board extends JPanel implements KeyListener{
     public final int HEIGHT = 606;
 
     public static int colorblind = 1;
-
 
     public Board()
     {
@@ -195,6 +190,8 @@ public class Board extends JPanel implements KeyListener{
         if(state == STATE_GAME_OVER) {
             g.setColor(Color.white);
             g.drawString("GAME OVER", 300, 300);
+            setVisible(false);
+            new EndPanel(score);
         }
         if(state == STATE_GAME_PAUSE) {
             g.setColor(Color.white);
