@@ -151,7 +151,6 @@ public class Board extends JPanel implements KeyListener{
                     g.setColor(board[row][col]);
                     g.drawString(text,col*BLOCK_SIZE+66, row*BLOCK_SIZE+80);
                 }
-
             }
         }
         if (nextShape != null) {
@@ -204,9 +203,13 @@ public class Board extends JPanel implements KeyListener{
     }
 
     public void setNextShape() {
-        if(deletedLine>=3){
+        if(deletedLine>=1){
             add_L_Shape();
-            deletedLine -=3;
+            deletedLine %=1;
+        }
+        else if(score>=200){
+        
+        add_bomb_Shape();
         }
         else{
             int index = CustomRandom.selectNumber(1);//이지모드는 1.2 하드모드는 0.8의 가중치를 갖는다.
@@ -240,11 +243,35 @@ public class Board extends JPanel implements KeyListener{
             int col = random.nextInt(x[row].length);
             if (x[row][col] == 1) { // 블록이 채워져있다면
                 x[row][col] = 2;
+                
                 found = true;
             }
+            
         }
-        currentShape = new Shape(x, this, colors[colorblind][index]);
+        nextShape = new Shape(x, this, colors[colorblind][index]);
     }
+    public void add_bomb_Shape() {
+        int[][] x = nextShape.getCoords();
+        Random random = new Random();
+        int index = random.nextInt(shapes.length);
+        boolean found = false;
+    
+        while (!found) {
+            int row = random.nextInt(x.length);
+            int col = random.nextInt(x[row].length);
+    
+            if (x[row][col] == 1) { // 블록이 채워져 있다면
+                x[row][col] = 3; // 폭탄 모양(값 3)으로 변경
+                found = true; // 원하는 위치에 폭탄 모양을 적용했으므로 루프 종료
+    
+            }
+        }
+    
+        // 폭탄 모양을 적용한 coords로 nextShape를 업데이트
+        nextShape = new Shape(x, this, colors[colorblind][index]);
+    }
+    
+    
         
     
 
@@ -324,9 +351,28 @@ public class Board extends JPanel implements KeyListener{
         for (int row = 0; row < BOARD_HEIGHT; row++) {
             boolean isFull = true;
             for (int col = 0; col < BOARD_WIDTH; col++) {
-                if(board[row][col]==Color.WHITE){
+                if(board[row][col]==Color.WHITE){ // L아이템을 발견하면
                     isFull = true;
                     break;
+                }
+                else if(board[row][col]==Color.GRAY){
+                    // 주변 8방향에 대한 상대적인 위치
+                    int[][] directions = {
+                        {-1, -1}, {-1, 0}, {-1, 1},
+                        {0, -1},         {0, 1},
+                        {1, -1}, {1, 0}, {1, 1}
+                    };
+        
+                    // 주변 8방향에 있는 블록을 삭제 처리
+                    board[row][col] = null;
+                    for (int[] dir : directions) {
+                        int newRow = row + dir[0];
+                        int newCol = col + dir[1];
+                        // 보드 범위 내에서 검사하고 해당 위치의 블록을 삭제
+                        if (newRow >= 0 && newRow < BOARD_HEIGHT && newCol >= 0 && newCol < BOARD_WIDTH) {
+                            board[newRow][newCol] = null;
+                        }
+                    }
                 }
                 if (board[row][col] == null) {
                     // board 배열의 해당 행의 모든 열을 null로 초기화 표시

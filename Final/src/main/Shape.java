@@ -14,7 +14,6 @@ public class Shape {
     private int delay;
 
     private int[][] coords;
-
     private int[][] reference;
 
     private int deltaX;
@@ -27,7 +26,6 @@ public class Shape {
     public static final int BOARD_WIDTH = 10;
     public static final int BOARD_HEIGHT = 20;
     public static final int BLOCK_SIZE = 30;
-
 
     public Shape(int[][] coords,Board board,Color color) { // 블록 모양, 보드선택, 색깔
         this.coords = coords;
@@ -52,7 +50,7 @@ public class Shape {
         time += deltaTime;
         lastTime = System.currentTimeMillis();
         // 블록을 쌓으면서 줄 삭제 확인
-        if(collision && timePassedFromCollision > 500) {
+        if(collision && timePassedFromCollision > 300) {
             // 보드에 블록 쌓기
             for (int row = 0; row < coords.length; row++) {
                 for (int col = 0; col < coords[0].length; col++) {
@@ -61,6 +59,9 @@ public class Shape {
                     }
                     else if (coords[row][col] == 2) {
                         board.getBoard()[y + row][x + col] = Color.WHITE;
+                    }
+                    else if(coords[row][col]==3){
+                        board.getBoard()[y+row][x+col] = Color.GRAY;
                     }
                 }
             }
@@ -226,12 +227,18 @@ public class Shape {
             for (int col = 0; col < coords[0].length; col++) {
                 if (coords[row][col] != 0) {
                     Color color;
-                    Color itemcolor;
-                    if (coords[row][col] == 2) {
-                        itemcolor = Color.white;
-                        g.setColor(itemcolor);
+                    Color itemcolor_L;
+                    Color itemColor_Bomb;
+                    if (coords[row][col] == 2) { // L 아이템
+                        itemcolor_L = Color.white;
+                        g.setColor(itemcolor_L);
                         g.drawString("L", col * BLOCK_SIZE + x * BLOCK_SIZE + 66, row * BLOCK_SIZE + y * BLOCK_SIZE + 80);
-                    } else {
+                    } else if (coords[row][col] == 3) { // Bomb 아이템
+                        itemColor_Bomb = Color.GRAY;
+                        g.setColor(itemColor_Bomb);
+                        g.drawString("B", col * BLOCK_SIZE + x * BLOCK_SIZE + 66, row * BLOCK_SIZE + y * BLOCK_SIZE + 80);
+                    }  
+                    else {
                         color = getColor(); // Shape의 색상 사용
                         g.setColor(color);
                         g.drawString("O", col * BLOCK_SIZE + x * BLOCK_SIZE + 66, row * BLOCK_SIZE + y * BLOCK_SIZE + 80);
