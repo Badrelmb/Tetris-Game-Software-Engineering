@@ -226,12 +226,12 @@ public class Board extends JPanel implements KeyListener{
     
     public void add_L_Shape(){
         int[][] x = nextShape.getCoords();
-        int index = ramdom.nextInt(shapes.length);
+        Random random = new Random();
+        int index = random.nextInt(shapes.length);
         boolean found = false;
         while (!found) {
             int row = random.nextInt(x.length);
             int col = random.nextInt(x[row].length);
-
             if (x[row][col] == 1) { // 블록이 채워져있다면
                 x[row][col] = 2;
                 found = true;
@@ -320,10 +320,13 @@ public class Board extends JPanel implements KeyListener{
             for (int col = 0; col < BOARD_WIDTH; col++) {
                 if (board[row][col] == null) {
                     // board 배열의 해당 행의 모든 열을 null로 초기화 표시
-                    isFull = false;
-                    
+                    isFull = false;       
                 }
-
+                if(board[row][col].equals(Color.WHITE)){
+                    isFull = false;
+                    break;
+                }
+            
             }
 
             if (isFull) {
