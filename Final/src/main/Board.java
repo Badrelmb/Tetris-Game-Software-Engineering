@@ -204,8 +204,14 @@ public class Board extends JPanel implements KeyListener{
     }
 
     public void setNextShape() {
-        int index = CustomRandom.selectNumber(1);//이지모드는 1.2 하드모드는 0.8의 가중치를 갖는다.
-        nextShape = new Shape(shapes[index].getCoords(), this, colors[colorblind][index]);
+        if(deletedLine>=3){
+            add_L_Shape();
+            deletedLine -=3;
+        }
+        else{
+            int index = CustomRandom.selectNumber(1);//이지모드는 1.2 하드모드는 0.8의 가중치를 갖는다.
+            nextShape = new Shape(shapes[index].getCoords(), this, colors[colorblind][index]);
+        }
     }
     public void setCurrentShape() {
         currentShape = nextShape;
@@ -318,22 +324,20 @@ public class Board extends JPanel implements KeyListener{
         for (int row = 0; row < BOARD_HEIGHT; row++) {
             boolean isFull = true;
             for (int col = 0; col < BOARD_WIDTH; col++) {
+                if(board[row][col]==Color.WHITE){
+                    isFull = true;
+                    break;
+                }
                 if (board[row][col] == null) {
                     // board 배열의 해당 행의 모든 열을 null로 초기화 표시
                     isFull = false;       
                 }
-                if(board[row][col].equals(Color.WHITE)){
-                    isFull = false;
-                    break;
-                }
-            
             }
 
             if (isFull) {
                 fullLines.add(row);
             }
         }
-        
         
         // 각 꽉 찬 줄에 대한 애니메이션을 적용하고 처리합니다.
         if (!fullLines.isEmpty()) {
