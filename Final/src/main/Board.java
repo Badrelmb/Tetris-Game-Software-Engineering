@@ -203,18 +203,20 @@ public class Board extends JPanel implements KeyListener{
     }
 
     public void setNextShape() {
-        if(deletedLine>=1){
-            add_L_Shape();
-            deletedLine %=1;
-        }
-        else if(score>=200){
+            if(deletedLine>=10){
+                add_L_Shape();
+                deletedLine %=10;
+            }
+            else if(delay==100){
+                delay +=80;
+                add_bomb_Shape();
+                
+            }
+            else{
+                int index = CustomRandom.selectNumber(1);//이지모드는 1.2 하드모드는 0.8의 가중치를 갖는다.
+                nextShape = new Shape(shapes[index].getCoords(), this, colors[colorblind][index]);
+            }
         
-        add_bomb_Shape();
-        }
-        else{
-            int index = CustomRandom.selectNumber(1);//이지모드는 1.2 하드모드는 0.8의 가중치를 갖는다.
-            nextShape = new Shape(shapes[index].getCoords(), this, colors[colorblind][index]);
-        }
     }
     public void setCurrentShape() {
         currentShape = nextShape;
