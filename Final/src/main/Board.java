@@ -203,20 +203,25 @@ public class Board extends JPanel implements KeyListener{
     }
 
     public void setNextShape() {
-            if(deletedLine>=10){
-                add_L_Shape();
+        if(deletedLine>=10){
+            Random r = new Random();
+            int i = r.nextInt(3);
+            switch (i) {
+                case 0:
+                    add_L_Shape();
+                    break;
+                case 1:
+                    add_HeavyBlock();
+                    break;
+                case 2:
+                    add_bomb_Shape();
+            }
                 deletedLine %=10;
-            }
-            else if(delay==100){
-                delay +=80;
-                add_bomb_Shape();
-                
-            }
-            else{
-                int index = CustomRandom.selectNumber(1);//이지모드는 1.2 하드모드는 0.8의 가중치를 갖는다.
-                nextShape = new Shape(shapes[index].getCoords(), this, colors[colorblind][index]);
-            }
-        
+        }     
+        else{
+            int index = CustomRandom.selectNumber(1);//이지모드는 1.2 하드모드는 0.8의 가중치를 갖는다.
+            nextShape = new Shape(shapes[index].getCoords(), this, colors[colorblind][index]);
+        }
     }
     public void setCurrentShape() {
         currentShape = nextShape;
@@ -237,25 +242,25 @@ public class Board extends JPanel implements KeyListener{
     
     public void add_L_Shape(){
         int[][] x = nextShape.getCoords();
+        Color color = nextShape.getColor();
         Random random = new Random();
-        int index = random.nextInt(shapes.length);
         boolean found = false;
         while (!found) {
             int row = random.nextInt(x.length);
             int col = random.nextInt(x[row].length);
             if (x[row][col] == 1) { // 블록이 채워져있다면
                 x[row][col] = 2;
-                
                 found = true;
             }
-            
         }
-        nextShape = new Shape(x, this, colors[colorblind][index]);
+        nextShape = new Shape(x, this, color);
     }
+
+    
     public void add_bomb_Shape() {
         int[][] x = nextShape.getCoords();
+        Color color = nextShape.getColor();
         Random random = new Random();
-        int index = random.nextInt(shapes.length);
         boolean found = false;
     
         while (!found) {
@@ -270,10 +275,26 @@ public class Board extends JPanel implements KeyListener{
         }
     
         // 폭탄 모양을 적용한 coords로 nextShape를 업데이트
-        nextShape = new Shape(x, this, colors[colorblind][index]);
+        nextShape = new Shape(x, this, color);
+    }    
+
+
+    public void add_HeavyBlock(){
+        Color color = nextShape.getColor();
+        Shape HBlock = new Shape(new int[][]{
+            {0, 1, 1, 0},
+            {1, 1, 1, 1}, // HeavyBlock shape;
+        }, this, color);
+        int[][] x = HBlock.getCoords();
+        for (int row = 0; row < x.length; row++) {
+            for (int col = 0; col < x[0].length; col++) {
+                if (x[row][col] == 1) { // 블록이 채워져있다면
+                    x[row][col] = 4;
+                }
+            }
+        }
+        currentShape = new Shape(x, this, color);
     }
-    
-    
         
     
 

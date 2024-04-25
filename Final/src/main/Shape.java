@@ -19,7 +19,7 @@ public class Shape {
     private int deltaX;
 
 
-    private boolean collision = false, moveX = false;
+    private boolean collision = false, moveX = true;
 
     private int timePassedFromCollision = -1;
 
@@ -44,8 +44,14 @@ public class Shape {
 
     long deltaTime;
 
-    public void update() { 
-        moveX = true;
+    public void update() {
+        int i = 0;
+        for (int col = 0; col < coords[0].length; col++) {
+            if (coords[0][col] == 4)
+                i++;
+        }
+        if (i == 0) // Heavy Block의 경우 부딪히면 움직이지 못함
+            moveX = true;
         deltaTime = System.currentTimeMillis() - lastTime;
         time += deltaTime;
         lastTime = System.currentTimeMillis();
@@ -61,7 +67,10 @@ public class Shape {
                         board.getBoard()[y + row][x + col] = Color.WHITE;
                     }
                     else if(coords[row][col]==3){
-                        board.getBoard()[y+row][x+col] = Color.GRAY;
+                        board.getBoard()[y + row][x + col] = Color.GRAY;
+                    }                    
+                    else if (coords[row][col] == 4) {
+                        board.getBoard()[y + row][x + col] = null;
                     }
                 }
             }
@@ -100,10 +109,17 @@ public class Shape {
                 for (int row = 0; row < coords.length; row++) {
                     for (int col = 0; col < coords[row].length; col++) {
                         if (coords[row][col] != 0) {
-
-                            if (board.getBoard()[y + 1 + row][x + col] != null) {
-                                collision();
+                            if (coords[row][col] == 4) {
+                                if (board.getBoard()[y + 1 + row][x + col] != null)
+                                    moveX = false;
+                                board.getBoard()[y + 1 + row][x + col] = null;
                             }
+                            else {
+                                if (board.getBoard()[y + 1 + row][x + col] != null) {
+                                    collision();
+                                }
+                            }
+ 
                         }
                     }
                 }
@@ -227,18 +243,21 @@ public class Shape {
             for (int col = 0; col < coords[0].length; col++) {
                 if (coords[row][col] != 0) {
                     Color color;
-                    Color itemcolor_L;
+                    Color itemColor_L;
                     Color itemColor_Bomb;
                     if (coords[row][col] == 2) { // L 아이템
-                        itemcolor_L = Color.white;
-                        g.setColor(itemcolor_L);
+                        itemColor_L = Color.white;
+                        g.setColor(itemColor_L);
                         g.drawString("L", col * BLOCK_SIZE + x * BLOCK_SIZE + 66, row * BLOCK_SIZE + y * BLOCK_SIZE + 80);
                     } else if (coords[row][col] == 3) { // Bomb 아이템
                         itemColor_Bomb = Color.GRAY;
                         g.setColor(itemColor_Bomb);
                         g.drawString("B", col * BLOCK_SIZE + x * BLOCK_SIZE + 66, row * BLOCK_SIZE + y * BLOCK_SIZE + 80);
-                    }  
-                    else {
+                    } else if (coords[row][col] == 4) { // 무게추 아이템
+                        color = getColor();
+                        g.setColor(color);
+                        g.drawString("H", col * BLOCK_SIZE + x * BLOCK_SIZE + 66, row * BLOCK_SIZE + y * BLOCK_SIZE + 80);
+                    } else {
                         color = getColor(); // Shape의 색상 사용
                         g.setColor(color);
                         g.drawString("O", col * BLOCK_SIZE + x * BLOCK_SIZE + 66, row * BLOCK_SIZE + y * BLOCK_SIZE + 80);
