@@ -5,14 +5,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.ArrayList;
 import java.util.Random;
+import java.util.ArrayList;
 import java.util.List;
-
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
 public class Board extends JPanel implements KeyListener{
+
+    private static final long serialVersionUID = 1L;
 
     private static int delay = 300;
 
@@ -28,16 +29,19 @@ public class Board extends JPanel implements KeyListener{
 
     private Timer looper;
     private Color[][] board = new Color[BOARD_HEIGHT][BOARD_WIDTH];
-    
-    
+
+    private int deletedLine;
+
     private Random random= new Random();
 
     private Color[] colors = {Color.CYAN, Color.MAGENTA, Color.ORANGE,Color.BLUE,
             Color.GREEN,Color.RED,Color.YELLOW};
+
+    private char[] numbers ={'0','0','0','0','0','0'};
     private Shape[] shapes = new Shape[7];
 
     private Shape currentShape, nextShape;
-    private int deletedLineCount = 0;
+
     private int score = 0;
     public static int left_x;
     public static int right_x;
@@ -104,7 +108,6 @@ public class Board extends JPanel implements KeyListener{
     {
         if(state == STATE_GAME_PLAY) {
             currentShape.update();
-            
         }
         return;
     }
@@ -193,28 +196,22 @@ public class Board extends JPanel implements KeyListener{
     }
 
     public void setNextShape() {
-        int index = random.nextInt(shapes.length);
+        int index = CustomRandom.selectNumber(1);//이지모드는 1.2 하드모드는 0.8의 가중치를 갖는다.
         nextShape = new Shape(shapes[index].getCoords(), this, colors[index]);
-    
-            
     }
     public void setCurrentShape() {
-        currentShape = nextShape;        
+        currentShape = nextShape;
         setNextShape();
-
         for (int row = 0; row < currentShape.getCoords().length; row++) {
             for (int col = 0; col < currentShape.getCoords()[0].length; col++) {
-                if (currentShape.getCoords()[row][col] != 0) { // 블럭이 존재하고
-                    if (board[currentShape.getY() + row][currentShape.getX() + col] != null) { // 행을 초과하면
+                if (currentShape.getCoords()[row][col] != 0) {
+                    if (board[currentShape.getY() + row][currentShape.getX() + col] != null) {
                         state = STATE_GAME_OVER;
                     }
                 }
             }
         }
-        setRandomBlockToWhite();
     }
-    
-    
 
 
     // 키 버튼 이벤트
@@ -224,40 +221,50 @@ public class Board extends JPanel implements KeyListener{
     }
 
     @Override
-    
     public void keyPressed(KeyEvent e) {
-        if (state == STATE_GAME_PLAY) {
-            // 게임 플레이 중일 때의 키 입력 처리
-            if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
+        // 오른쪽,왼쪽,아래,회전,떨어뜨리기, 일시중지, 게임종료
+        if(state== STATE_GAME_PLAY) {
+            if(e.getKeyCode()==KeyEvent.VK_RIGHT) {
                 currentShape.setDeltaX(1);
-            } else if (e.getKeyCode() == KeyEvent.VK_LEFT) {
+            }
+            else if(e.getKeyCode()==KeyEvent.VK_LEFT) {
                 currentShape.setDeltaX(-1);
-            } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-                currentShape.moveDown();
-            } else if (e.getKeyCode() == KeyEvent.VK_UP) {
+            }
+            else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+                currentShape.moveDown(); // VK_DOWN 키를 눌렀을 때 블록을 한 칸 아래로 이동
+            }
+            else if(e.getKeyCode()==KeyEvent.VK_UP) {
                 currentShape.rotateShape();
-            } else if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+            }
+            else if(e.getKeyCode()==KeyEvent.VK_SPACE) {
                 currentShape.dropDown();
-            } else if (e.getKeyCode() == KeyEvent.VK_P) {
+            }
+            else if(e.getKeyCode() == KeyEvent.VK_P) {
                 state = STATE_GAME_PAUSE;
-            } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                System.exit(0); // ESC 키로 게임 종료
             }
-        } else if (state == STATE_GAME_OVER) {
-            // 게임 오버 상태일 때의 키 입력 처리
-            if (e.getKeyCode() == KeyEvent.VK_P) {
-                // 게임 재시작
-                startGame();
-            } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                System.exit(0); // ESC 키로 게임 종료
+            else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                // 게임 종료
+                System.exit(0);
             }
-        } else if (state == STATE_GAME_PAUSE) {
-            // 게임 일시 정지 상태일 때의 키 입력 처리
-            if (e.getKeyCode() == KeyEvent.VK_P) {
-                state = STATE_GAME_PLAY; // 다시 게임 플레이 상태로 변경
-            }
-        
         }
+        // 게임 리플레이
+        else if(state == STATE_GAME_OVER) {
+            if(e.getKeyCode() == KeyEvent.VK_P) {
+                for(int row =0; row<board.length;row++) {
+                    for(int col=0; col<board[row].length; col++) {
+                        board[row][col]=null;
+                    }
+                }
+            }
+            setCurrentShape();
+            state = STATE_GAME_PLAY;
+        }
+        else if(state == STATE_GAME_PAUSE) {
+            if(e.getKeyCode() == KeyEvent.VK_P) {
+                state = STATE_GAME_PLAY;}
+        }
+
+
     }
 
     @Override
@@ -270,6 +277,7 @@ public class Board extends JPanel implements KeyListener{
         setCurrentShape();
         state = STATE_GAME_PLAY;
         looper.start();
+
     }
     public void stopGame() {
         score = 0;
@@ -281,11 +289,9 @@ public class Board extends JPanel implements KeyListener{
         }
         looper.stop();
     }
-    
     // 줄 삭제 알고리즘
     public void checkLine() {
         List<Integer> fullLines = new ArrayList<>();
-        
         // 꽉 찬 줄을 찾아서 삭제할 줄로 표시합니다.
         for (int row = 0; row < BOARD_HEIGHT; row++) {
             boolean isFull = true;
@@ -305,12 +311,11 @@ public class Board extends JPanel implements KeyListener{
         if (!fullLines.isEmpty()) {
             // 줄 삭제 및 deletedLineCount 증가
             animateLineDeletion(fullLines);
-            deletedLineCount += fullLines.size();
+            deletedLine += fullLines.size();
         }
     }
-    // 흰색을 지정할떄까지는 다음 블록 생성 x 하게 해야함
     private void setRandomBlockToWhite() {
-        if (currentShape != null && deletedLineCount >= 3) { // 현재 떨어지고 있는 블록이 있고, 삭제된 줄 수가 3 이상인 경우
+        if (currentShape != null ) { // 현재 떨어지고 있는 블록이 존재
             int[][] coords = currentShape.getCoords();
             Random random = new Random();
             boolean found = false;
@@ -330,8 +335,7 @@ public class Board extends JPanel implements KeyListener{
             repaint();
         }
     }
-    
-    
+
     private void animateLineDeletion(List<Integer> fullLines) {
         Timer timer = new Timer(100, new ActionListener() {
             int flashCount = 0;
@@ -363,8 +367,8 @@ public class Board extends JPanel implements KeyListener{
     
         timer.start();
     }
-    
-    private void clearAndDropLines(List<Integer> fullLines) {
+
+private void clearAndDropLines(List<Integer> fullLines) {
         // 꽉 찬 줄을 삭제합니다.
         for (Integer line : fullLines) {
             for (int col = 0; col < BOARD_WIDTH; col++) {
@@ -386,16 +390,6 @@ public class Board extends JPanel implements KeyListener{
                 }
             }
         }
-    
-        // 점수 업데이트 등 게임 로직 처리를 수행합니다.
-        score += fullLines.size() * 100; // 삭제된 줄 수에 따라 점수를 추가합니다.
-        checkLine();
-        deletedLineCount %= 3;
-        repaint(); // 화면을 다시 그립니다.
-    }
-    
-    
-    
 
 
     class GameLooper implements ActionListener {
@@ -406,9 +400,6 @@ public class Board extends JPanel implements KeyListener{
             if(!(state ==STATE_GAME_PAUSE)) {
                 update();
                 repaint();
-                 // deletedLineCount가 3 이상이면 nextShape 업데이트
-                
-
 
                 // 시간이 1분 경과했을 때 속도 증가
                 long currentTime = System.currentTimeMillis();
@@ -425,13 +416,20 @@ public class Board extends JPanel implements KeyListener{
 
                 looper.setDelay(delay);
                 System.out.println("딜레이 : "+delay);
-                System.out.println("삭제된 줄의 수 : "+deletedLineCount);
+                System.out.println("삭제된 줄의 수 : "+deletedLine);
 
+                if(deletedLine>=5) {
+                    delay -= 20;
+                    addBonusScore();
+                    if (delay <=100) { // 100ms 이하로 감소하지 않도록 보정
+                        delay = 100;
+                    }
+                    deletedLine %=5;
+                }
             }
 
         }
     }
-    
 
     public void addScore() {
         score +=2 ;
