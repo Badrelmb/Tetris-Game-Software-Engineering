@@ -39,10 +39,9 @@ public class Board extends JPanel implements KeyListener{
     Color YELLOW = new Color(240, 228, 66);
     Color BLUE = new Color(0, 114, 187);
 
-    private Color[] colors = {Color.CYAN, Color.MAGENTA, Color.ORANGE,Color.BLUE,
-            Color.GREEN,Color.RED,Color.YELLOW};
+    private Color[][] colors = {{Color.CYAN, Color.MAGENTA, Color.ORANGE,Color.BLUE,
+            Color.GREEN,Color.RED,Color.YELLOW},{BLUISHGREEN,REDDISHPURPLE,ORANGE,SKYBLUE,BLUE,VERMILION,YELLOW}};
 
-    private char[] numbers ={'0','0','0','0','0','0'};
     private Shape[] shapes = new Shape[7];
 
     private boolean iscolored = false;
@@ -206,7 +205,7 @@ public class Board extends JPanel implements KeyListener{
 
     public void setNextShape() {
         int index = CustomRandom.selectNumber(1);//이지모드는 1.2 하드모드는 0.8의 가중치를 갖는다.
-        nextShape = new Shape(shapes[index].getCoords(), this, colors[index]);
+        nextShape = new Shape(shapes[index].getCoords(), this, colors[colorblind][index]);
     }
     public void setCurrentShape() {
         currentShape = nextShape;
@@ -227,7 +226,7 @@ public class Board extends JPanel implements KeyListener{
     
     public void add_L_Shape(){
         int[][] x = nextShape.getCoords();
-        int index = random.nextInt(shapes.length);
+        int index = ramdom.nextInt(shapes.length);
         boolean found = false;
         while (!found) {
             int row = random.nextInt(x.length);
@@ -238,7 +237,7 @@ public class Board extends JPanel implements KeyListener{
                 found = true;
             }
         }
-        currentShape = new Shape(x, this, colors[index]);
+        currentShape = new Shape(x, this, colors[colorblind][index]);
     }
         
     
