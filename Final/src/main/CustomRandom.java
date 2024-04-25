@@ -1,52 +1,84 @@
 package Final.src.main;
-
 import java.util.Random;
+import java.util.Scanner;
 
-public class CustomRandom {
-    private static final int TOTAL_NUMBERS = 7;
-    private static final double INCREASED_PROBABILITY = 0.2; // 20% 확률 증가
 
-    private final double increasedProbability;
+public class CustomRandom{
+    private static final double[] weights = {1, 1, 1, 1, 1, 1, 1}; // 가중치 배열
 
-    public CustomRandom(double increasedProbability) {
-        this.increasedProbability = increasedProbability;
-    }
-
-    public int generateNumber(Random random) {
-        double probability = random.nextDouble(); // 0.0부터 1.0 사이의 난수 생성
-        if (probability < increasedProbability) {
-            // 추가된 확률만큼 확률이 증가하면 0 반환
-            return 0;
-        } else {
-            // 기본 확률만큼의 확률로 1부터 6까지의 숫자 반환
-            return random.nextInt(TOTAL_NUMBERS - 1) + 1;
-        }
-    }
-
-    /*public static void main(String[] args) {
-        int[] count = new int[TOTAL_NUMBERS];
-        int totalRuns = 1000;
-
+    // 룰렛 휠 선택 메소드
+    public static int selectNumber(double n) {
         Random random = new Random();
-        CustomRandom customRandom = new CustomRandom(INCREASED_PROBABILITY);
-
-        for (int i = 0; i < totalRuns; i++) {
-            int number = customRandom.generateNumber(random);
-            count[number]++;
+        double totalWeight = 0;
+        weights[0] = n;
+        // 전체 가중치 합 구하기
+        for (double weight : weights) {
+            totalWeight += weight;
         }
 
-        // 결과 출력
-        System.out.println("Number\tCount");
-        for (int i = 0; i < TOTAL_NUMBERS; i++) {
-            System.out.println(i + "\t\t" + count[i]);
+        // 룰렛 휠 돌리기
+        double randomNumber = random.nextDouble() * totalWeight;
+        double cumulativeWeight = 0;
+
+        // 선택된 숫자 결정
+        for (int i = 0; i < weights.length; i++) {
+            cumulativeWeight += weights[i];
+            if (randomNumber < cumulativeWeight) {
+                return i; // 선택된 숫자 반환
+            }
         }
 
-        // 0의 예상 카운트 계산
-        double expectedCountForZero = totalRuns * (INCREASED_PROBABILITY + (1.0 - INCREASED_PROBABILITY) / (TOTAL_NUMBERS - 1));
-        System.out.println("Expected count for 0: " + expectedCountForZero);
+        // 여기까지 도달하는 경우 오류 처리
+        throw new RuntimeException("Should never get here");
+    }
 
-        // 0의 실제 비율 계산
-        double actualProbabilityForZero = (double) count[0] / totalRuns;
-        System.out.println("Actual probability for 0: " + actualProbabilityForZero);
-    }*/
+    // 각 숫자의 확률 계산 메소드
+    public static double[] calculateProbabilities() {
+        double totalWeight = 0;
+
+        // 전체 가중치 합 구하기
+        for (double weight : weights) {
+            totalWeight += weight;
+        }
+
+        // 각 숫자의 확률 계산
+        double[] probabilities = new double[weights.length];
+        for (int i = 0; i < weights.length; i++) {
+            probabilities[i] = weights[i] / totalWeight;
+        }
+
+        return probabilities;
+    }
+
+    public static void main(String[] args) {
+        double[] probabilities = calculateProbabilities();
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("가중치 입력 1.2 or 0.8 : ");
+
+        double n = scanner.nextDouble();
+
+
+        // 시뮬레이션을 통해 선택된 숫자 테스트
+        int totalIterations = 100000;
+        int[] count = new int[weights.length];
+        for (int i = 0; i < totalIterations; i++) {
+            int selectedNumber = selectNumber(n);
+            count[selectedNumber]++;
+        }
+
+        // 각 숫자가 선택된 횟수 출력
+        System.out.println("\n각 숫자가 선택된 횟수:");
+        for (int i = 0; i < count.length; i++) {
+            System.out.println(i + ": " + count[i]);
+        }
+
+
+        // 각 숫자의 확률 출력
+        System.out.println("각 숫자가 나올 확률:");
+        for (int i = 0; i < probabilities.length; i++) {
+            System.out.println(i + ": " + (double)count[i]/totalIterations*100+"%");
+        }
+
+        scanner.close();
+    }
 }
