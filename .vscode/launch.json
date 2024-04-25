@@ -1,0 +1,56 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Current File",
+            "request": "launch",
+            "mainClass": "${file}"
+        },
+        {
+            "type": "java",
+            "name": "CustomRandom",
+            "request": "launch",
+            "mainClass": "Final.src.main.CustomRandom",
+            "projectName": "Tetris-Game-Software-Engineering_34114619"
+        },
+        {
+            "type": "java",
+            "name": "MenuFrame",
+            "request": "launch",
+            "mainClass": "Final.src.main.MenuFrame",
+            "projectName": "Tetris-Game-Software-Engineering_34114619"
+        },
+        {
+            "type": "java",
+            "name": "ReadCsv",
+            "request": "launch",
+            "mainClass": "Final.src.main.ReadCsv",
+            "projectName": "Tetris-Game-Software-Engineering_34114619"
+        },
+        {
+            "type": "java",
+            "name": "WindowGame",
+            "request": "launch",
+            "mainClass": "Final.src.main.WindowGame",
+            "projectName": "Tetris-Game-Software-Engineering_34114619"
+        },
+        {
+            "type": "java",
+            "name": "main",
+            "request": "launch",
+            "mainClass": "Final.src.main.main",
+            "projectName": "Tetris-Game-Software-Engineering_34114619"
+        },
+        {
+            "type": "java",
+            "name": "WindowGame(1)",
+            "request": "launch",
+            "mainClass": "WindowGame",
+            "projectName": "Tetris-Game-Software-Engineering_34114619"
+        }
+    ]
+}

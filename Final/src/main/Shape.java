@@ -52,16 +52,22 @@ public class Shape {
         time += deltaTime;
         lastTime = System.currentTimeMillis();
         // 블록을 쌓으면서 줄 삭제 확인
-        if(collision && timePassedFromCollision > 500) {
+        if(collision && timePassedFromCollision > 300) {
             // 보드에 블록 쌓기
             for (int row = 0; row < coords.length; row++) {
                 for (int col = 0; col < coords[0].length; col++) {
-                    if (coords[row][col] != 0) {
+                    if (coords[row][col] == 1) {
                         board.getBoard()[y + row][x + col] = color;
+                    }
+                    else if (coords[row][col] == 2) {
+                        board.getBoard()[y + row][x + col] = Color.WHITE;
                     }
                 }
             }
+            // 줄 삭제 확인
             board.checkLine();
+
+            // 새로운 모양 생성
             board.setCurrentShape();
             timePassedFromCollision = -1;
         }
@@ -218,18 +224,29 @@ public class Shape {
     public void render(Graphics g) {
         for (int row = 0; row < coords.length; row++) {
             for (int col = 0; col < coords[0].length; col++) {
-                if (coords[row][col] !=0) {
+                if (coords[row][col] != 0) {
                     Color color;
-                    color = getColor(); // Use the Shape's color for others
-                    g.setColor(color);
-                    g.drawString("O", col * BLOCK_SIZE + x * BLOCK_SIZE + 66, row * BLOCK_SIZE + y * BLOCK_SIZE + 80);
+                    Color itemcolor;
+                    if (coords[row][col] == 2) {
+                        itemcolor = Color.white;
+                        g.setColor(itemcolor);
+                        g.drawString("L", col * BLOCK_SIZE + x * BLOCK_SIZE + 66, row * BLOCK_SIZE + y * BLOCK_SIZE + 80);
+                    } else {
+                        color = getColor(); // Shape의 색상 사용
+                        g.setColor(color);
+                        g.drawString("O", col * BLOCK_SIZE + x * BLOCK_SIZE + 66, row * BLOCK_SIZE + y * BLOCK_SIZE + 80);
+                    }
+                    
                 }
-                
             }
         }
+        
     }
+    
 
-
+    public void setCoords(int[][] Coords){
+        this.coords = Coords;
+    }
     public void setDeltaX(int deltaX) {
         this.deltaX = deltaX;
     }

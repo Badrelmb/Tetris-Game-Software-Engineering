@@ -5,15 +5,14 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.Random;
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.List;
+
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
 public class Board extends JPanel implements KeyListener{
-
-    private static final long serialVersionUID = 1L;
 
     private static int delay = 300;
 
@@ -29,17 +28,16 @@ public class Board extends JPanel implements KeyListener{
 
     private Timer looper;
     private Color[][] board = new Color[BOARD_HEIGHT][BOARD_WIDTH];
-
+    
     private int deletedLine;
-
+    
     private Random random= new Random();
 
     private Color[] colors = {Color.CYAN, Color.MAGENTA, Color.ORANGE,Color.BLUE,
             Color.GREEN,Color.RED,Color.YELLOW};
-
-    private char[] numbers ={'0','0','0','0','0','0'};
     private Shape[] shapes = new Shape[7];
 
+    private boolean iscolored = false;
     private Shape currentShape, nextShape;
 
     private int score = 0;
@@ -113,7 +111,7 @@ public class Board extends JPanel implements KeyListener{
     }
 
 
-
+// 보드판 그리기
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -196,75 +194,100 @@ public class Board extends JPanel implements KeyListener{
     }
 
     public void setNextShape() {
-        int index = CustomRandom.selectNumber(1);//이지모드는 1.2 하드모드는 0.8의 가중치를 갖는다.
-        nextShape = new Shape(shapes[index].getCoords(), this, colors[index]);
+        iscolored = false;
+        if(deletedLine>=3){
+            while(!iscolored){
+                deletedLine%=3;
+                add_L_Shape();
+                iscolored=true;
+            }
+           
+            
+        }
+        else{
+    
+            int index = random.nextInt(shapes.length);
+            nextShape = new Shape(shapes[index].getCoords(), this, colors[index]);
+        }
     }
     public void setCurrentShape() {
         currentShape = nextShape;
+        
         setNextShape();
+
         for (int row = 0; row < currentShape.getCoords().length; row++) {
             for (int col = 0; col < currentShape.getCoords()[0].length; col++) {
-                if (currentShape.getCoords()[row][col] != 0) {
-                    if (board[currentShape.getY() + row][currentShape.getX() + col] != null) {
+                if (currentShape.getCoords()[row][col] != 0) { // 블럭이 존재하고
+                    if (board[currentShape.getY() + row][currentShape.getX() + col] != null) { // 행을 초과하면
                         state = STATE_GAME_OVER;
                     }
                 }
             }
+
         }
     }
+    
+    public void add_L_Shape(){
+        int[][] x = nextShape.getCoords();
+        int index = random.nextInt(shapes.length);
+        boolean found = false;
+        while (!found) {
+            int row = random.nextInt(x.length);
+            int col = random.nextInt(x[row].length);
+
+            if (x[row][col] == 1) { // 블록이 채워져있다면
+                x[row][col] = 2;
+                found = true;
+            }
+        }
+        currentShape = new Shape(x, this, colors[index]);
+    }
+        
+    
 
 
-    // 키 버튼 이벤트
+// 키 버튼 조작
+
+
     @Override
     public void keyTyped(KeyEvent e) {
 
     }
-
     @Override
+    
     public void keyPressed(KeyEvent e) {
-        // 오른쪽,왼쪽,아래,회전,떨어뜨리기, 일시중지, 게임종료
-        if(state== STATE_GAME_PLAY) {
-            if(e.getKeyCode()==KeyEvent.VK_RIGHT) {
+        if (state == STATE_GAME_PLAY) {
+            // 게임 플레이 중일 때의 키 입력 처리
+            if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
                 currentShape.setDeltaX(1);
-            }
-            else if(e.getKeyCode()==KeyEvent.VK_LEFT) {
+            } else if (e.getKeyCode() == KeyEvent.VK_LEFT) {
                 currentShape.setDeltaX(-1);
-            }
-            else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-                currentShape.moveDown(); // VK_DOWN 키를 눌렀을 때 블록을 한 칸 아래로 이동
-            }
-            else if(e.getKeyCode()==KeyEvent.VK_UP) {
+            } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+                currentShape.moveDown();
+            } else if (e.getKeyCode() == KeyEvent.VK_UP) {
                 currentShape.rotateShape();
-            }
-            else if(e.getKeyCode()==KeyEvent.VK_SPACE) {
+            } else if (e.getKeyCode() == KeyEvent.VK_SPACE) {
                 currentShape.dropDown();
-            }
-            else if(e.getKeyCode() == KeyEvent.VK_P) {
+            } else if (e.getKeyCode() == KeyEvent.VK_P) {
                 state = STATE_GAME_PAUSE;
+            } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                System.exit(0); // ESC 키로 게임 종료
             }
-            else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                // 게임 종료
-                System.exit(0);
+        } else if (state == STATE_GAME_OVER) {
+            // 게임 오버 상태일 때의 키 입력 처리
+            if (e.getKeyCode() == KeyEvent.VK_P) {
+                // 게임 재시작
+                startGame();
+            } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                System.exit(0); // ESC 키로 게임 종료
             }
-        }
-        // 게임 리플레이
-        else if(state == STATE_GAME_OVER) {
-            if(e.getKeyCode() == KeyEvent.VK_P) {
-                for(int row =0; row<board.length;row++) {
-                    for(int col=0; col<board[row].length; col++) {
-                        board[row][col]=null;
-                    }
-                }
+        } else if (state == STATE_GAME_PAUSE) {
+            // 게임 일시 정지 상태일 때의 키 입력 처리
+            if (e.getKeyCode() == KeyEvent.VK_P) {
+                state = STATE_GAME_PLAY; // 다시 게임 플레이 상태로 변경
             }
-            setCurrentShape();
-            state = STATE_GAME_PLAY;
+        
         }
-        else if(state == STATE_GAME_PAUSE) {
-            if(e.getKeyCode() == KeyEvent.VK_P) {
-                state = STATE_GAME_PLAY;}
-        }
-
-
     }
 
     @Override
@@ -277,7 +300,6 @@ public class Board extends JPanel implements KeyListener{
         setCurrentShape();
         state = STATE_GAME_PLAY;
         looper.start();
-
     }
     public void stopGame() {
         score = 0;
@@ -289,54 +311,41 @@ public class Board extends JPanel implements KeyListener{
         }
         looper.stop();
     }
-    // 줄 삭제 알고리즘
+
+// 동작 알고리즘
+
+    // 줄 삭제 탐색
     public void checkLine() {
         List<Integer> fullLines = new ArrayList<>();
         // 꽉 찬 줄을 찾아서 삭제할 줄로 표시합니다.
         for (int row = 0; row < BOARD_HEIGHT; row++) {
             boolean isFull = true;
             for (int col = 0; col < BOARD_WIDTH; col++) {
-                if (board[row][col] == null||board[row][col].equals(Color.white)) {
-                    // board 배열의 해당 행의 모든 열을 null로 초기화
+                if (board[row][col] == null) {
+                    // board 배열의 해당 행의 모든 열을 null로 초기화 표시
                     isFull = false;
-                    break;
+                    
                 }
+
             }
+
             if (isFull) {
                 fullLines.add(row);
             }
         }
-    
+        
+        
         // 각 꽉 찬 줄에 대한 애니메이션을 적용하고 처리합니다.
         if (!fullLines.isEmpty()) {
             // 줄 삭제 및 deletedLineCount 증가
             animateLineDeletion(fullLines);
             deletedLine += fullLines.size();
         }
+        
     }
-    private void setRandomBlockToWhite() {
-        if (currentShape != null ) { // 현재 떨어지고 있는 블록이 존재
-            int[][] coords = currentShape.getCoords();
-            Random random = new Random();
-            boolean found = false;
+   
     
-            // 랜덤하게 흰색 블록을 설정합니다.
-            while (!found) {
-                int row = random.nextInt(coords.length);
-                int col = random.nextInt(coords[row].length);
-    
-                if (coords[row][col] != 0) { // 블록이 존재하는 경우
-                    board[row][col] = Color.white;
-                    found = true;
-                }
-            }
-    
-            // 다시 렌더링하여 변경 사항을 적용합니다.
-            repaint();
-        }
-    }
-
-    private void animateLineDeletion(List<Integer> fullLines) {
+    private void animateLineDeletion(List<Integer> fullLines) { // 줄삭제 애니메이션 처리
         Timer timer = new Timer(100, new ActionListener() {
             int flashCount = 0;
             boolean isVisible = true;
@@ -367,15 +376,13 @@ public class Board extends JPanel implements KeyListener{
     
         timer.start();
     }
-
-private void clearAndDropLines(List<Integer> fullLines) {
-        // 꽉 찬 줄을 삭제합니다.
+    private void clearAndDropLines(List<Integer> fullLines) {
+        
         for (Integer line : fullLines) {
             for (int col = 0; col < BOARD_WIDTH; col++) {
                 board[line][col] = null;
             }
         }
-    
         // 삭제된 줄 위의 모든 블록을 한 번에 아래로 이동시킵니다.
         for (int row = fullLines.get(0) - 1; row >= 0; row--) {
             for (int col = 0; col < BOARD_WIDTH; col++) {
@@ -389,8 +396,11 @@ private void clearAndDropLines(List<Integer> fullLines) {
                     }
                 }
             }
-        }
 
+        }
+        
+        
+    }
 
     class GameLooper implements ActionListener {
         private long lastSpeedIncreaseTime = System.currentTimeMillis();
@@ -412,24 +422,18 @@ private void clearAndDropLines(List<Integer> fullLines) {
                     }
                     lastSpeedIncreaseTime = currentTime;
                 }
+
                 System.out.println("속도가 빨라지기까지의 시간 : "+(60 - ((currentTime-lastSpeedIncreaseTime)/1000) ) +"초");
 
                 looper.setDelay(delay);
                 System.out.println("딜레이 : "+delay);
                 System.out.println("삭제된 줄의 수 : "+deletedLine);
 
-                if(deletedLine>=5) {
-                    delay -= 20;
-                    addBonusScore();
-                    if (delay <=100) { // 100ms 이하로 감소하지 않도록 보정
-                        delay = 100;
-                    }
-                    deletedLine %=5;
-                }
             }
 
         }
     }
+    
 
     public void addScore() {
         score +=2 ;
