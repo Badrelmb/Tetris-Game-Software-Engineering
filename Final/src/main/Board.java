@@ -204,8 +204,14 @@ public class Board extends JPanel implements KeyListener{
     }
 
     public void setNextShape() {
-        int index = CustomRandom.selectNumber(1);//이지모드는 1.2 하드모드는 0.8의 가중치를 갖는다.
-        nextShape = new Shape(shapes[index].getCoords(), this, colors[colorblind][index]);
+        if(deletedLine>=3){
+            add_L_Shape();
+            deletedLine -=3;
+        }
+        else{
+            int index = CustomRandom.selectNumber(1);//이지모드는 1.2 하드모드는 0.8의 가중치를 갖는다.
+            nextShape = new Shape(shapes[index].getCoords(), this, colors[colorblind][index]);
+        }
     }
     public void setCurrentShape() {
         currentShape = nextShape;
@@ -226,12 +232,12 @@ public class Board extends JPanel implements KeyListener{
     
     public void add_L_Shape(){
         int[][] x = nextShape.getCoords();
-        int index = ramdom.nextInt(shapes.length);
+        Random random = new Random();
+        int index = random.nextInt(shapes.length);
         boolean found = false;
         while (!found) {
             int row = random.nextInt(x.length);
             int col = random.nextInt(x[row].length);
-
             if (x[row][col] == 1) { // 블록이 채워져있다면
                 x[row][col] = 2;
                 found = true;
@@ -318,19 +324,20 @@ public class Board extends JPanel implements KeyListener{
         for (int row = 0; row < BOARD_HEIGHT; row++) {
             boolean isFull = true;
             for (int col = 0; col < BOARD_WIDTH; col++) {
+                if(board[row][col]==Color.WHITE){
+                    isFull = true;
+                    break;
+                }
                 if (board[row][col] == null) {
                     // board 배열의 해당 행의 모든 열을 null로 초기화 표시
-                    isFull = false;
-                    
+                    isFull = false;       
                 }
-
             }
 
             if (isFull) {
                 fullLines.add(row);
             }
         }
-        
         
         // 각 꽉 찬 줄에 대한 애니메이션을 적용하고 처리합니다.
         if (!fullLines.isEmpty()) {

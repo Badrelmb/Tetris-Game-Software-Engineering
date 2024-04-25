@@ -52,7 +52,7 @@ public class Shape {
         time += deltaTime;
         lastTime = System.currentTimeMillis();
         // 블록을 쌓으면서 줄 삭제 확인
-        if(collision && timePassedFromCollision > 300) {
+        if(collision && timePassedFromCollision > 500) {
             // 보드에 블록 쌓기
             for (int row = 0; row < coords.length; row++) {
                 for (int col = 0; col < coords[0].length; col++) {
